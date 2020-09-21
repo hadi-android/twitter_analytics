@@ -7,23 +7,21 @@ Created on Fri Sep 11 11:07:44 2020
 
 import pickle
 import json
-from datetime import date
 from twitter import *
 from searchtweets import load_credentials, gen_rule_payload, collect_results
 
-def read_user_timeline(name, method):
+def read_user_timeline(name, from_date, to_date, method):
     
     if method == 'fullsearch':
         premium_search_args = load_credentials(".twitter_keys.yaml", account_type = "premium", env_overwrite=False)
         rule = gen_rule_payload("from:"+name,
-                            from_date="2020-1-1", #UTC 2017-09-01 00:00
-                            to_date=str(date.today()),
+                            from_date=str(from_date.strftime('%Y-%m-%d')), #UTC 2017-09-01 00:00
+                            to_date=str(to_date.strftime('%Y-%m-%d')),
                             results_per_call=100)
         tweets = collect_results(rule,
                              max_results=100,
                              result_stream_args=premium_search_args) # change this if you need to
     
-        pickle.dump(tweets, open(name+'tweets_fullsearch.sav','wb')) 
         
     elif method == 'tweepy':
         creds = json.load(open("twitter_credentials.json", "r"))       
@@ -38,7 +36,9 @@ def read_user_timeline(name, method):
                 last_id = t[-1]['id']
                 tweets.extend(t)
                 
-        pickle.dump(tweets, open(name+'tweets.sav','wb'))        
+        pickle.dump(tweets, open(name+'tweets.sav','wb'))    
+        
+    return tweets
         
             
     
