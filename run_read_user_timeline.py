@@ -11,6 +11,7 @@ import os
 import pandas as pd
 from datetime import date
 import datetime
+import re
 
 
 office = ['Microsoft365','MSFTDynamics365','linkedin']
@@ -27,24 +28,36 @@ oldest_date = to_date
 # str(to_date)
 # str(to_date.strftime('%Y-%m-%d'))
 
-tweets_office=[]
-for thandle in office:
-    if(os.path.isfile(thandle+'tweets_fullsearch.sav')==False):
-        print('Extracting timeline for ' +thandle)
-        while (oldest_date>=from_date):
-            tweets = read_user_timeline(thandle, from_date, to_date, 'fullsearch')
-            dates = [t['created_at'] for t in tweets]
-            oldest_date = pd.to_datetime(dates).min().strftime('%Y-%m-%d')
-            to_date = pd.to_datetime(dates).max().strftime('%Y-%m-%d')
-            pickle.dump(tweets, open(thandle+'_tweets_fullsearch_'+str(oldest_date)+'-'+str(to_date) +'.sav','wb')) 
-            to_date = pd.to_datetime(dates).min()
-            oldest_date = pd.to_datetime(dates).min().replace(tzinfo=None)
+# tweets_office=[]
+# for thandle in office:
+#     if(os.path.isfile(thandle+'tweets_fullsearch.sav')==False):
+#         print('Extracting timeline for ' +thandle)
+#         while (oldest_date>=from_date):
+#             tweets = read_user_timeline(thandle, from_date, to_date, 'fullsearch')
+#             dates = [t['created_at'] for t in tweets]
+#             oldest_date = pd.to_datetime(dates).min().strftime('%Y-%m-%d')
+#             to_date = pd.to_datetime(dates).max().strftime('%Y-%m-%d')
+#             pickle.dump(tweets, open(thandle+'_tweets_fullsearch_'+str(oldest_date)+'-'+str(to_date) +'.sav','wb')) 
+#             to_date = pd.to_datetime(dates).min()
+#             oldest_date = pd.to_datetime(dates).min().replace(tzinfo=None)
 
-        # tweets_office.append(pickle.load(open(thandle+'tweets_fullsearch.sav','rb')))
-    else:
-        print('Loading previously extracted timeline for ' + thandle)
-        tweets_office.append(pickle.load(open(thandle+'tweets_fullsearch.sav','rb')))
-        
+#         # tweets_office.append(pickle.load(open(thandle+'tweets_fullsearch.sav','rb')))
+#     else:
+#         print('Loading previously extracted timeline for ' + thandle)
+#         tweets_office.append(pickle.load(open(thandle+'tweets_fullsearch.sav','rb')))
+
+tweets = read_user_timeline('Microsoft365', pd.to_datetime('2020-1-1'), pd.to_datetime('2020-1-17'), 'fullsearch')
+
+
+all_tweets=[]
+regex = re.compile('Microsoft365_tweets_fullsearch_.*\.sav')
+rootdir = os.getcwd()
+
+for root, dirs, files in os.walk(rootdir):
+  for file in files:
+    if regex.match(file):
+        all_tweets.append(pickle.load(open(file,'rb')))
+        print(file)
         
 date_range = []
 date_list = []
